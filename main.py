@@ -83,7 +83,7 @@ class Game:
         #? Level Selection Variables
         self.level_selection_title = Text("Level Selection", 114, 5, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
         self.level_selection_button_1 = Button("1 ", 54, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(1))
-        self.level_selection_button_2 = Button("2 ", 74, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_2 = Button("2 ", 74, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(2))
         self.level_selection_button_3 = Button("3 ", 94, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_4 = Button("4 ", 114, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_5 = Button("5 ", 134, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
@@ -111,10 +111,10 @@ class Game:
         #? Dialogs
         self.dialog_1 = Dialog([("Sign", "Welcome to Queue It !\nA game where you need to use\ncorrectly the different gems."), ("Sign", "Each gem gives you a different\nability. You can use those gems\nby pressing SPACE."), ("Sign", "If you ever get stuck, you can\nrestart the level by pressing R."), ("Sign", "You can alos press ESCAPE to go\nback to the main menu."), ("Sign", "The green one in front of you\nallows you to jump."), ("Sign", "Go ahead, try it !")], 0, 9, 9, True, 9, True, 0, 10)
         self.dialog_2 = Dialog([("Sign", "This gem allows you to dash for\na short period of time."), ("Sign", "During this time you are\ninvincible to everything.")], 0, 12, 12, True, 12, True, 0, 10)
+        self.dialog_3 = Dialog([("Sign", "The gem on your left makes you\nphase up into the terrain."), ("Sign", "The phasing can help you go\ntrough up to 4 tiles upwards.")], 0, 15, 15, True, 15, True, 0, 10)
+        self.dialog_4 = Dialog([("Sign", "This one basically shifts your\ngravity."), ("Sign", "When the gravity is reversed\nyou can still jump and phase\nbut downards now.")], 0, 6, 6, True, 6, True, 0, 10)
 
         self.dialog_breaking_gem = Dialog([("Sign", "This one gives you the power to\ndestroy weaker blocks."), ("Sign", "It destroys all the neighboring\nones.")], 0, 4, 4, True, 4, True, 0, 10)
-        self.dialog_phase_gem = Dialog([("Sign", "The gem on your left makes you\nphase up into the terrain."), ("Sign", "The phasing can help you go\ntrough up to 4 tiles upwards.")], 0, 15, 15, True, 15, True, 0, 10)
-        self.dialog_gravity_gem = Dialog([("Sign", "This last one basically shifts\nyour gravity."), ("Sign", "When the gravity is reversed\nyou can still jump and phase\nbut downards now.")], 0, 6, 6, True, 6, True, 0, 10)
 
         #? Levels Variables
         self.tilemap = None
@@ -153,6 +153,9 @@ class Game:
             if level == 1:
                 self.tilemap = Tilemap(3, 0, 0, 96*8, 56*8, 0)
                 self.player = Player(18*8, 29*8, self.tilemap)
+            elif level == 2:
+                self.tilemap = Tilemap(4, 0, 0, 72*8, 40*8, 0)
+                self.player = Player(20*8, 29*8, self.tilemap)
 
             # if level == 1:
             #     self.tilemap = Tilemap(3, 0, 0, 80*8, 24*8, 0)
@@ -273,20 +276,14 @@ class Game:
         if level == 1:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 21, 30) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_1)
-            if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 50, 38) and not self.dialog_manager.is_dialog():
+            elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 50, 38) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_2)
 
-        # if level == 1:
-        #     if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 26, 7) and not self.dialog_manager.is_dialog():
-        #         self.dialog_manager.start_dialog(self.dialog_jump_gem)
-        #     elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 36, 5) and not self.dialog_manager.is_dialog():
-        #         self.dialog_manager.start_dialog(self.dialog_dash_gem)
-        #     elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 57, 5) and not self.dialog_manager.is_dialog():
-        #         self.dialog_manager.start_dialog(self.dialog_breaking_gem)
-        #     elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 59, 14) and not self.dialog_manager.is_dialog():
-        #         self.dialog_manager.start_dialog(self.dialog_phase_gem)
-        #     elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 53, 10) and not self.dialog_manager.is_dialog():
-        #         self.dialog_manager.start_dialog(self.dialog_gravity_gem)
+        elif level == 2:
+            if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 21, 30) and not self.dialog_manager.is_dialog():
+                self.dialog_manager.start_dialog(self.dialog_3)
+            elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 43, 22) and not self.dialog_manager.is_dialog():
+                self.dialog_manager.start_dialog(self.dialog_4)
 
         self.dialog_manager.update()
 
