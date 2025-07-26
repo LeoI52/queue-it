@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 17/05/2025
+@updated : 26/07/2025
 """
 
 from copy import deepcopy
@@ -20,13 +20,15 @@ DOOR_TILES = [(0,8),(1,8),(0,9),(1,9)]
 BREAKING_TILES = [(4,1),(5,1)]
 
 JUMP_GEM = 0
-PHASE_GEM = 1
-DASH_GEM = 2
-GRAVITY_GEM = 3
-BREAKING_GEM = 4
+BUILD_GEM = 1
+PHASE_GEM = 2
+DASH_GEM = 3
+GRAVITY_GEM = 4
+BREAKING_GEM = 5
 
 GEM_COLORS_DICT = {
     JUMP_GEM : [9, 10, 11],
+    BUILD_GEM : [7, 8],
     PHASE_GEM : [1, 15],
     DASH_GEM : [12, 13],
     GRAVITY_GEM : [6, 14],
@@ -35,6 +37,7 @@ GEM_COLORS_DICT = {
 
 GEMS_DICT = {
     JUMP_GEM : (1, 80, 6, 8),
+    BUILD_GEM : (8, 80, 8, 8),
     PHASE_GEM : (17, 80, 6, 8),
     DASH_GEM : (24, 81, 7, 7),
     GRAVITY_GEM : (32, 80, 8, 8),
@@ -43,6 +46,7 @@ GEMS_DICT = {
 
 SPECIAL_TILES_DICT = {
     (0, 10) : [(0, 0), JUMP_GEM],
+    (1, 10) : [(0, 0), BUILD_GEM],
     (2, 10) : [(0, 0), PHASE_GEM],
     (3, 10) : [(0, 0), DASH_GEM],
     (4, 10) : [(0, 0), GRAVITY_GEM],
@@ -132,7 +136,7 @@ class Tilemap:
                     world_x = self.x + tx * 8
                     world_y = self.y + ty * 8
 
-                    if object_type in [JUMP_GEM, PHASE_GEM, DASH_GEM, GRAVITY_GEM, BREAKING_GEM]:
+                    if object_type in [JUMP_GEM, BUILD_GEM, PHASE_GEM, DASH_GEM, GRAVITY_GEM, BREAKING_GEM]:
                         new_gems.append(Gem(object_type, world_x, world_y))
 
         return new_gems
@@ -184,6 +188,15 @@ class Player:
             self.velocity_y = -self.jump_power * self.gravity_direction
             self.jumping = True
             self.on_ground = False
+        elif gem == BUILD_GEM:
+            self.gems.pop(0)
+            pyxel.play(1, 13)
+            if pyxel.tilemaps[self.tilemap.id].pget(self.x // 8, self.y // 8 + 2) == (0, 0):
+                pyxel.tilemaps[self.tilemap.id].pset(self.x // 8, self.y // 8 + 2, (random.randint(4, 5), 1))
+            if pyxel.tilemaps[self.tilemap.id].pget(self.x // 8 - 1, self.y // 8 + 2) == (0, 0):
+                pyxel.tilemaps[self.tilemap.id].pset(self.x // 8 - 1, self.y // 8 + 2, (random.randint(4, 5), 1))
+            if pyxel.tilemaps[self.tilemap.id].pget(self.x // 8 + 1, self.y // 8 + 2) == (0, 0):
+                pyxel.tilemaps[self.tilemap.id].pset(self.x // 8 + 1, self.y // 8 + 2, (random.randint(4, 5), 1))
         elif gem == PHASE_GEM:
             pyxel.play(1, 6)
             self.gems.pop(0)
@@ -258,10 +271,10 @@ class Player:
         self.player_idle.update()
         self.player_walk.update()
 
-        if self.gravity_direction == 1 and (self.tilemap.collision_rect_tiles(self.x, self.y - 3, self.width, self.height, KILL_TILES) and self.velocity_y >= 0 and not self.dead) or (self.tilemap.collision_rect_tiles(self.x, self.y + 3, self.width, self.height, KILL_TILES) and self.velocity_y < -1 and not self.dead):
+        if self.gravity_direction == 1 and (self.tilemap.collision_rect_tiles(self.x, self.y, self.width, self.height, KILL_TILES) and self.velocity_y >= 0 and not self.dead) or (self.tilemap.collision_rect_tiles(self.x, self.y, self.width, self.height, KILL_TILES) and self.velocity_y < -1 and not self.dead):
             pyxel.play(1, 7)
             self.dead = True
-        elif self.gravity_direction == -1 and (self.tilemap.collision_rect_tiles(self.x, self.y + 3, self.width, self.height, KILL_TILES) and self.velocity_y > 0 and not self.dead) or (self.tilemap.collision_rect_tiles(self.x, self.y - 3, self.width, self.height, KILL_TILES) and self.velocity_y <= -1 and not self.dead):
+        elif self.gravity_direction == -1 and (self.tilemap.collision_rect_tiles(self.x, self.y, self.width, self.height, KILL_TILES) and self.velocity_y > 0 and not self.dead) or (self.tilemap.collision_rect_tiles(self.x, self.y, self.width, self.height, KILL_TILES) and self.velocity_y <= -1 and not self.dead):
             pyxel.play(1, 7)
             self.dead = True
 
