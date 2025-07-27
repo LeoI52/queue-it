@@ -1,13 +1,14 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 17/05/2025
+@updated : 27/07/2025
 """
 
 import random
 import pyxel
 import math
-import time
+import sys
+import os
 
 DEFAULT_PYXEL_COLORS = [0x000000, 0x2B335F, 0x7E2072, 0x19959C, 
                         0x8B4852, 0x395C98, 0xA9C1FF, 0xEEEEEE, 
@@ -189,187 +190,162 @@ ANCHOR_CENTER = 8
 
 class PyxelManager:
 
-    def __init__(self, window_size:tuple, scenes:list, default_scene_id:int, fps:int=60, fullscreen:bool=False, mouse:bool=False, quit_key:int=pyxel.KEY_ESCAPE, camera_x:int=0, camera_y:int=0)-> None:
+    def __init__(self, width:int, height:int, scenes:list, default_scene_id:int=0, fps:int=60, fullscreen:bool=False, mouse:bool=False, quit_key:int=pyxel.KEY_ESCAPE, camera_x:int=0, camera_y:int=0):
+        
         self.__fps = fps
-        self.__scenes = scenes
-        for scene in self.__scenes:
-            if scene.id == default_scene_id:
-                self.__current_scene = scene
+        self.__scenes_dict = {scene.id:scene for scene in scenes}
+        self.__current_scene = self.__scenes_dict.get(default_scene_id, 0)
+        self.__transition = {}
 
-        self.__camera_x = camera_x
-        self.__camera_y = camera_y
-        self.__camera_target_x = self.__camera_x
-        self.__camera_target_y = self.__camera_y
+        self.__cam_x = self.__cam_tx = camera_x
+        self.__cam_y = self.__cam_ty = camera_y
         self.__shake_amount = 0
-        self.__substracting_shake_amount = 0
+        self.__sub_shake_amount = 0
 
-        self.__debug_mode = False
-        self.__debug_color = 7
-        self.__start_time = time.time()
-        self.__current_fps = self.__fps
-
-        pyxel.init(window_size[0], window_size[1], fps=self.__fps, quit_key=quit_key)
+        pyxel.init(width, height, fps=self.__fps, quit_key=quit_key)
         pyxel.fullscreen(fullscreen)
         pyxel.mouse(mouse)
 
         if self.__current_scene.pyxres_path:
-            pyxel.load(self.__current_scene.pyxres_path)
+            pyxel.load(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), self.__current_scene.pyxres_path))
         pyxel.title(self.__current_scene.title)
         pyxel.screen_mode(self.__current_scene.screen_mode)
         pyxel.colors.from_list(self.__current_scene.palette)
 
     @property
     def camera_x(self)-> int:
-        return self.__camera_x
+        return self.__cam_x
     
     @property
     def camera_y(self)-> int:
-        return self.__camera_y
-    
+        return self.__cam_y
+
     @property
     def mouse_x(self)-> int:
-        return self.__camera_x + pyxel.mouse_x
+        return self.__cam_x + pyxel.mouse_x
     
     @property
     def mouse_y(self)-> int:
-        return self.__camera_y + pyxel.mouse_y
-
+        return self.__cam_y + pyxel.mouse_y
+    
     @property
     def fps(self)-> int:
         return self.__fps
+    
+    def set_camera(self, new_camera_x:int, new_camera_y:int):
+        self.__cam_x = self.__cam_tx = new_camera_x
+        self.__cam_y = self.__cam_ty = new_camera_y
 
-    @property
-    def current_fps(self)-> int:
-        return self.__current_fps
+    def move_camera(self, new_camera_x:int, new_camera_y:int):
+        self.__cam_tx = new_camera_x
+        self.__cam_ty = new_camera_y
 
-    def set_camera(self, new_x:int, new_y:int)-> None:
-        self.__camera_x = new_x
-        self.__camera_y = new_y
-        self.__camera_target_x = new_x
-        self.__camera_target_y = new_y
-        pyxel.camera(self.__camera_x, self.__camera_y)
+    def shake_camera(self, amount:int, sub_amount:float):
+        self.__shake_amount = amount
+        self.__sub_shake_amount = sub_amount
 
-    def move_camera_to(self, target_x:int, target_y:int)-> None:
-        self.__camera_target_x = target_x
-        self.__camera_target_y = target_y
+    def change_scene(self, new_scene_id:int, new_camera_x:int=0, new_camera_y:int=0):
+        self.set_camera(new_camera_x, new_camera_y)
 
-    def shake_camera(self, amount:int, substracting_shake_amount:int)-> None:
-        self.__substracting_shake_amount = abs(substracting_shake_amount)
-        self.__shake_amount = abs(amount)
+        self.__current_scene = self.__scenes_dict.get(new_scene_id, 0)
 
-    def change_scene(self, new_scene_id:int, next_camera_x:int=0, next_camera_y:int=0, action=None)-> None:
-        self.set_camera(next_camera_x, next_camera_y)
-        for scene in self.__scenes:
-            if scene.id == new_scene_id:
-                self.__current_scene = scene
         if self.__current_scene.pyxres_path:
-            pyxel.load(self.__current_scene.pyxres_path)
+            pyxel.load(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), self.__current_scene.pyxres_path))
         pyxel.title(self.__current_scene.title)
         pyxel.screen_mode(self.__current_scene.screen_mode)
         pyxel.colors.from_list(self.__current_scene.palette)
-        if action: action()
 
-    def change_scene_outer_circle(self, new_scene_id:int, speed:int, transition_color:int, next_camera_x:int=0, next_camera_y:int=0, action=None)-> None:
-        start_end = int(((pyxel.width ** 2 + pyxel.height ** 2) ** 0.5) / 2) + 1
-        end = start_end
-        while end > 0:
-            self.draw()
-            for radius in range(start_end, end, -1):
-                pyxel.ellib(self.__camera_x + pyxel.width / 2 - radius, self.__camera_y + pyxel.height / 2 - radius, radius * 2, radius * 2, transition_color)
-                pyxel.ellib(self.__camera_x + pyxel.width / 2 - radius + 1, self.__camera_y + pyxel.height / 2 - radius, radius * 2, radius * 2, transition_color)
-            end -= abs(speed)
-            pyxel.flip()
+    def change_scene_dither(self, new_scene_id:int, speed:float, transition_color:int, new_camera_x:int=0, new_camera_y:int=0, action=None):
+        self.__transition = {
+            "type":"dither",
+            "direction":1,
+            "new_scene_id":new_scene_id,
+            "speed":speed,
+            "transition_color":transition_color,
+            "new_camera_x":new_camera_x,
+            "new_camera_y":new_camera_y,
+            "dither":0,
+            "action":action
+        }
 
-        self.change_scene(new_scene_id, next_camera_x, next_camera_y, action)
+    def change_scene_outer_circle(self, new_scene_id:int, speed:int, transition_color:int, new_camera_x:int=0, new_camera_y:int=0, action=None):
+        self.__transition = {
+            "type":"outer_circle",
+            "direction":1,
+            "new_scene_id":new_scene_id,
+            "speed":speed,
+            "transition_color":transition_color,
+            "new_camera_x":new_camera_x,
+            "new_camera_y":new_camera_y,
+            "start_end":int(((pyxel.width ** 2 + pyxel.height ** 2) ** 0.5) / 2) + 1,
+            "end":int(((pyxel.width ** 2 + pyxel.height ** 2) ** 0.5) / 2) + 1,
+            "action":action
+        }
 
-        while end < start_end:
-            self.draw()
-            for radius in range(start_end, end, -1):
-                pyxel.ellib(self.__camera_x + pyxel.width / 2 - radius, self.__camera_y + pyxel.height / 2 - radius, radius * 2, radius * 2, transition_color)
-                pyxel.ellib(self.__camera_x + pyxel.width / 2 - radius + 1, self.__camera_y + pyxel.height / 2 - radius, radius * 2, radius * 2, transition_color)
-            end += abs(speed)
-            pyxel.flip()
+    def apply_palette_effect(self, effect_function):
+        pyxel.colors.from_list(effect_function(self.__current_scene.palette))
 
-    def change_scene_dither(self, new_scene_id:int, speed:int, transition_color:int, next_camera_x:int=0, next_camera_y:int=0, action=None)-> None:
-        dither = 0
-        while dither < 1:
-            dither += abs(speed)
-            self.draw()
-            pyxel.dither(dither)
-            pyxel.rect(self.__camera_x, self.__camera_y, pyxel.width, pyxel.height, transition_color)
-            pyxel.dither(1)
-            pyxel.flip()
-
-        self.change_scene(new_scene_id, next_camera_x, next_camera_y, action)
-
-        while dither > 0:
-            dither -= abs(speed)
-            self.draw()
-            pyxel.dither(dither)
-            pyxel.rect(self.__camera_x, self.__camera_y, pyxel.width, pyxel.height, transition_color)
-            pyxel.dither(1)
-            pyxel.flip()
-
-    def change_palette(self, new_palette:list)-> None:
-        pyxel.colors.from_list(new_palette)
-
-    def apply_palette_effect(self, function_effect)-> None:
-        pyxel.colors.from_list(function_effect(self.__current_scene.palette))
-
-    def reset_palette(self)-> None:
+    def reset_palette(self):
         pyxel.colors.from_list(self.__current_scene.palette)
 
-    def activate_debug(self, debug_color:int=7, camera_speed:int=2)-> None:
-        self.__debug_mode = True
-        self.__debug_color = debug_color
-        self.__debug_camera_speed = camera_speed
+    def handle_transitions(self):
 
-    def deactivate_debug(self)-> None:
-        self.__debug_mode = False
+        if self.__transition.get("type") == "dither":
+            self.__transition["dither"] += self.__transition["speed"] * self.__transition["direction"]
 
-    def toogle_debug(self, debug_color:int=7, camera_speed:int=2)-> None:
-        self.__debug_mode = not self.__debug_mode
-        self.__debug_color = debug_color
-        self.__debug_camera_speed = camera_speed
+            if self.__transition["dither"] > 1 and self.__transition["direction"] == 1:
+                self.__transition["direction"] = -1
+                self.change_scene(self.__transition["new_scene_id"], self.__transition["new_camera_x"], self.__transition["new_camera_y"])
+                if self.__transition["action"]:
+                    self.__transition["action"]()
+            if self.__transition["dither"] < 0 and self.__transition["direction"] == -1:
+                self.__transition = {}
+                return
+            pyxel.dither(self.__transition["dither"])
+            pyxel.rect(self.__cam_x, self.__cam_y, pyxel.width, pyxel.height, self.__transition["transition_color"])
+            pyxel.dither(1)
 
-    def update(self)-> None:
-        if self.__debug_mode:
-            if pyxel.btn(pyxel.KEY_RIGHT):
-                self.set_camera(self.__camera_x + self.__debug_camera_speed, self.__camera_y)
-            if pyxel.btn(pyxel.KEY_LEFT):
-                self.set_camera(self.__camera_x - self.__debug_camera_speed, self.__camera_y)
-            if pyxel.btn(pyxel.KEY_UP):
-                self.set_camera(self.__camera_x, self.__camera_y - self.__debug_camera_speed)
-            if pyxel.btn(pyxel.KEY_DOWN):
-                self.set_camera(self.__camera_x, self.__camera_y + self.__debug_camera_speed)
+        elif self.__transition.get("type") == "outer_circle":
+            self.__transition["end"] -= self.__transition["speed"] * self.__transition["direction"]
 
-        self.__camera_x += (self.__camera_target_x - self.__camera_x) * 0.1
-        self.__camera_y += (self.__camera_target_y - self.__camera_y) * 0.1
+            if self.__transition["end"] < 0 and self.__transition["direction"] == 1:
+                self.__transition["direction"] = -1
+                self.change_scene(self.__transition["new_scene_id"], self.__transition["new_camera_x"], self.__transition["new_camera_y"])
+                if self.__transition["action"]:
+                    self.__transition["action"]()
+            if self.__transition["end"] > self.__transition["start_end"] and self.__transition["direction"] == -1:
+                self.__transition = {}
+                return
+            
+            for radius in range(self.__transition["start_end"], self.__transition["end"], -1):
+                pyxel.ellib(self.__cam_x + pyxel.width / 2 - radius, self.__cam_y + pyxel.height / 2 - radius, radius * 2, radius * 2, self.__transition["transition_color"])
+                pyxel.ellib(self.__cam_x + pyxel.width / 2 - radius + 1, self.__cam_y + pyxel.height / 2 - radius, radius * 2, radius * 2, self.__transition["transition_color"])
+
+    def update(self):
+        self.__cam_x += (self.__cam_tx - self.__cam_x) * 0.1
+        self.__cam_y += (self.__cam_ty - self.__cam_y) * 0.1
 
         if self.__shake_amount > 0:
             amount = int(self.__shake_amount)
-            pyxel.camera(self.__camera_x + random.randint(-amount, amount), self.__camera_y + random.randint(-amount, amount))
-            self.__shake_amount -= self.__substracting_shake_amount
+            pyxel.camera(self.__cam_x + random.randint(-amount, amount), self.__cam_y + random.randint(-amount, amount))
+            self.__shake_amount -= self.__sub_shake_amount
         else:
-            pyxel.camera(self.__camera_x, self.__camera_y)
+            pyxel.camera(self.__cam_x, self.__cam_y)
 
-        self.__current_scene.update()
+        if not self.__transition.get("type"):
+            self.__current_scene.update()
 
-    def draw(self)-> None:
+    def draw(self):
         self.__current_scene.draw()
-        if self.__debug_mode:
-            pyxel.text(self.camera_x + 5, self.camera_y + 5, f"({int(self.mouse_x)},{int(self.mouse_y)})", self.__debug_color)
-            pyxel.text(self.camera_x + 5, self.camera_y + 15, f"fps:{self.__current_fps}", self.__debug_color)
-        if pyxel.frame_count % self.__fps == 0:
-            self.__current_fps = int(1 / (time.time() - self.__start_time))
-        self.__start_time = time.time()
-    
-    def run(self)-> None:
+        if self.__transition:
+            self.handle_transitions()
+
+    def run(self):
         pyxel.run(self.update, self.draw)
 
 class Scene:
 
-    def __init__(self, id:int, title:str, update, draw, pyxres_path:str=None, palette:list=DEFAULT_PYXEL_COLORS, screen_mode:int=0)-> None:
+    def __init__(self, id:int, title:str, update, draw, pyxres_path:str=None, palette:list=DEFAULT_PYXEL_COLORS, screen_mode:int=0):
         self.id = id
         self.title = title
         self.update = update
@@ -391,35 +367,15 @@ class Sprite:
         self.flip_vertical = False
 
     def flip_h(self) -> None:
-        """
-        Flip H
-        ===
-        Enables horizontal flipping of the sprite.
-        """
         self.flip_horizontal = True
 
     def unflip_h(self) -> None:
-        """
-        Unflip H
-        ===
-        Disables horizontal flipping of the sprite.
-        """
         self.flip_horizontal = False
 
     def flip_v(self) -> None:
-        """
-        Flip V
-        ===
-        Enables vertical flipping of the sprite.
-        """
         self.flip_vertical = True
 
     def unflip_v(self) -> None:
-        """
-        Unflip V
-        ===
-        Disables vertical flipping of the sprite.
-        """
         self.flip_vertical = False
 
 class Animation:

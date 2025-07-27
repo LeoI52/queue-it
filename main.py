@@ -46,6 +46,7 @@
 from world import *
 from utils import *
 import pyxel
+import time
 
 #? Constants
 FPS = 60
@@ -68,7 +69,7 @@ class Game:
         scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene]
 
         #? Pyxel Manager
-        self.pyxel_manager = PyxelManager((228, 128), scenes, 0, FPS, True, False, pyxel.KEY_A)
+        self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
 
         #? Main Menu Variables
         self.main_menu_title = Text("Queue It !", 114, 10, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
@@ -183,22 +184,6 @@ class Game:
                 self.tilemap = Tilemap(7, 0, 0, 72*8, 24*8, 0)
                 self.player = Player(16*8, 8*8, self.tilemap, [Gem(JUMP_GEM), Gem(BREAKING_GEM)])
 
-            # if level == 1:
-            #     self.tilemap = Tilemap(3, 0, 0, 80*8, 24*8, 0)
-            #     self.player = Player(22*8, 6*8, self.tilemap)
-            # elif level == 2:
-            #     self.tilemap = Tilemap(4, 0, 0, 56*8, 24*8, 0)
-            #     self.player = Player(16*8, 9*8, self.tilemap, [Gem(JUMP_GEM), Gem(DASH_GEM), Gem(JUMP_GEM), Gem(JUMP_GEM), Gem(DASH_GEM)])
-            # elif level == 3:
-            #     self.tilemap = Tilemap(5, 0, 0, 72*8, 24*8, 0)
-            #     self.player = Player(16*8, 8*8, self.tilemap, [Gem(JUMP_GEM), Gem(BREAKING_GEM)])
-            # elif level == 4:
-            #     self.tilemap = Tilemap(6, 0, 0, 56*8, 32*8, 0)
-            #     self.player = Player(24*8, 23*8, self.tilemap)
-            # elif level == 5:
-            #     self.tilemap = Tilemap(7, 0, 0, 1000, 1000, 0)
-            #     self.player = Player(16*8, 14*8, self.tilemap, [Gem(GRAVITY_GEM) for _ in range(4)])
-
             self.gem_manager = GemManager(self.tilemap.load_tiles())
             self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
             time.sleep(0.1)
@@ -297,26 +282,23 @@ class Game:
         if self.player.is_breaking:
             self.pyxel_manager.shake_camera(10, 0.5)
         self.gem_manager.update(self.player)
-        self.pyxel_manager.move_camera_to(self.player.x - 114, self.player.y - 64)
+        self.pyxel_manager.move_camera(self.player.x - 114, self.player.y - 64)
 
         if level == 1:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 21, 30) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_1)
             elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 50, 38) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_2)
-
         elif level == 2:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 21, 30) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_3)
             elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 43, 22) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_4)
-
         elif level == 3:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 20, 30) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_5)
             elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 37, 30) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_6)
-
         elif level == 4:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 26, 15) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_7)
