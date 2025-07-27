@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 26/07/2025
+@updated : 27/07/2025
 
 * Gems Types :
 - Green : Jump Gem
@@ -84,9 +84,9 @@ class Game:
         self.level_selection_title = Text("Level Selection", 114, 5, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
         self.level_selection_button_1 = Button("1 ", 54, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(1))
         self.level_selection_button_2 = Button("2 ", 74, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(2))
-        self.level_selection_button_3 = Button("3 ", 94, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_4 = Button("4 ", 114, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_5 = Button("5 ", 134, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_3 = Button("3 ", 94, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(3))
+        self.level_selection_button_4 = Button("4 ", 114, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(4))
+        self.level_selection_button_5 = Button("5 ", 134, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(5))
         self.level_selection_button_6 = Button("6 ", 154, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_7 = Button("7 ", 174, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_8 = Button("8 ", 54, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
@@ -109,12 +109,29 @@ class Game:
         self.player_animation_menus = Animation(Sprite(0, 0, 9, 6, 7, 0), 2, 20, True)
 
         #? Dialogs
-        self.dialog_1 = Dialog([("Sign", "Welcome to Queue It !\nA game where you need to use\ncorrectly the different gems."), ("Sign", "Each gem gives you a different\nability. You can use those gems\nby pressing SPACE."), ("Sign", "If you ever get stuck, you can\nrestart the level by pressing R."), ("Sign", "You can alos press ESCAPE to go\nback to the main menu."), ("Sign", "The green one in front of you\nallows you to jump."), ("Sign", "Go ahead, try it !")], 0, 9, 9, True, 9, True, 0, 10)
-        self.dialog_2 = Dialog([("Sign", "This gem allows you to dash for\na short period of time."), ("Sign", "During this time you are\ninvincible to everything.")], 0, 12, 12, True, 12, True, 0, 10)
-        self.dialog_3 = Dialog([("Sign", "The gem on your left makes you\nphase up into the terrain."), ("Sign", "The phasing can help you go\ntrough up to 4 tiles upwards.")], 0, 15, 15, True, 15, True, 0, 10)
-        self.dialog_4 = Dialog([("Sign", "This one basically shifts your\ngravity."), ("Sign", "When the gravity is reversed\nyou can still jump and phase\nbut downards now.")], 0, 6, 6, True, 6, True, 0, 10)
-
-        self.dialog_breaking_gem = Dialog([("Sign", "This one gives you the power to\ndestroy weaker blocks."), ("Sign", "It destroys all the neighboring\nones.")], 0, 4, 4, True, 4, True, 0, 10)
+        self.dialog_1 = Dialog([("Sign", "Welcome to Queue It !\nUse the right gem to overcome\neach challenge."),
+                                ("Sign", "Each gem gives you a different\nability. Press SPACE to use the\nfirst gem in your queue."),
+                                ("Sign", "If you get stuck, press R to\nrestart the level at any time."),
+                                ("Sign", "You can also press ESC to\nreturn to the main menu."),
+                                ("Sign", "See that green gem up ahead ?\nIt gives you the power to JUMP."),
+                                ("Sign", "Go on, give it a try !")], 0, 9, 9, True, 9, True, 0, 10)
+        self.dialog_2 = Dialog([("Sign", "This gem grants a quick DASH\nforward."),
+                                ("Sign", "While dashing, you're invincible,\nperfect for dodging hazards !")], 0, 12, 12, True, 12, True, 0, 10)
+        self.dialog_3 = Dialog([("Sign", "The gem on your left lets you\nPHASE upward through terrain."),
+                                ("Sign", "It moves you up to 4 tiles,\ngreat for tight spaces or\nreaching ledges!")], 0, 15, 15, True, 15, True, 0, 10)
+        self.dialog_4 = Dialog([("Sign", "This gem flips your GRAVITY."),
+                                ("Sign", "You'll fall upward but you can\nstill jump and phase\n(just downward instead).")], 0, 6, 6, True, 6, True, 0, 10)
+        self.dialog_5 = Dialog([("Sign", "This gem gives you the power to\nBREAK weaker blocks."),
+                                ("Sign", "It destroys all nearby\nbreakable tiles in a small\nradius.")], 0, 4, 4, True, 4, True, 0, 10)
+        self.dialog_6 = Dialog([("Sign", "Stuck with nowhere to land ?\nNot anymore."),
+                                ("Sign", "The BUILD gem creates a\nplatform under you."),
+                                ("Sign", "Use it to save yourself from\nfalling."),
+                                ("Sign", "Try building under your feet\nnow !")], 0, 8, 8, True, 8, True, 0, 10)
+        self.dialog_7 = Dialog([
+            ("Sign", "Well done ! You've mastered the\ngem queue."),
+            ("Sign", "Remember : gems are used in the\norder they appear."),
+            ("Sign", "Think ahead, plan your queue,\nand adapt on the fly."),
+            ("Sign", "Good luck - the real challenge\nbegins now !")], 0, 1, 1, True, 1, True, 0, 10)
 
         #? Levels Variables
         self.tilemap = None
@@ -156,6 +173,15 @@ class Game:
             elif level == 2:
                 self.tilemap = Tilemap(4, 0, 0, 72*8, 40*8, 0)
                 self.player = Player(20*8, 29*8, self.tilemap)
+            elif level == 3:
+                self.tilemap = Tilemap(5, 0, 0, 96*8, 48*8, 0)
+                self.player = Player(19*8, 29*8, self.tilemap)
+            elif level == 4:
+                self.tilemap = Tilemap(6, 0, 0, 80*8, 32*8, 0)
+                self.player = Player(22*8, 13*8, self.tilemap)
+            elif level == 5:
+                self.tilemap = Tilemap(7, 0, 0, 72*8, 24*8, 0)
+                self.player = Player(16*8, 8*8, self.tilemap, [Gem(JUMP_GEM), Gem(BREAKING_GEM)])
 
             # if level == 1:
             #     self.tilemap = Tilemap(3, 0, 0, 80*8, 24*8, 0)
@@ -284,6 +310,16 @@ class Game:
                 self.dialog_manager.start_dialog(self.dialog_3)
             elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 43, 22) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_4)
+
+        elif level == 3:
+            if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 20, 30) and not self.dialog_manager.is_dialog():
+                self.dialog_manager.start_dialog(self.dialog_5)
+            elif pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 37, 30) and not self.dialog_manager.is_dialog():
+                self.dialog_manager.start_dialog(self.dialog_6)
+
+        elif level == 4:
+            if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 26, 15) and not self.dialog_manager.is_dialog():
+                self.dialog_manager.start_dialog(self.dialog_7)
 
         self.dialog_manager.update()
 
