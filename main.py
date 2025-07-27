@@ -182,7 +182,7 @@ class Game:
                 self.player = Player(22*8, 13*8, self.tilemap)
             elif level == 5:
                 self.tilemap = Tilemap(7, 0, 0, 72*8, 24*8, 0)
-                self.player = Player(16*8, 8*8, self.tilemap, [Gem(JUMP_GEM), Gem(BREAKING_GEM)])
+                self.player = Player(16*8, 8*8, self.tilemap, [Gem(JUMP_GEM), Gem(BREAK_GEM)])
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
             self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)

@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 26/07/2025
+@updated : 27/07/2025
 """
 
 from copy import deepcopy
@@ -17,14 +17,14 @@ KILL_TILES = [(0,7),(1,7),(2,7),(3,7),(4,7),(5,7),(6,7),(7,7)]
 
 DOOR_TILES = [(0,8),(1,8),(0,9),(1,9)]
 
-BREAKING_TILES = [(4,1),(5,1)]
+BREAK_TILES = [(4,1),(5,1)]
 
 JUMP_GEM = 0
 BUILD_GEM = 1
 PHASE_GEM = 2
 DASH_GEM = 3
 GRAVITY_GEM = 4
-BREAKING_GEM = 5
+BREAK_GEM = 5
 
 GEM_COLORS_DICT = {
     JUMP_GEM : [9, 10, 11],
@@ -32,7 +32,7 @@ GEM_COLORS_DICT = {
     PHASE_GEM : [1, 15],
     DASH_GEM : [12, 13],
     GRAVITY_GEM : [6, 14],
-    BREAKING_GEM : [3, 4]
+    BREAK_GEM : [3, 4]
 }
 
 GEMS_DICT = {
@@ -41,7 +41,7 @@ GEMS_DICT = {
     PHASE_GEM : (17, 80, 6, 8),
     DASH_GEM : (24, 81, 7, 7),
     GRAVITY_GEM : (32, 80, 8, 8),
-    BREAKING_GEM : (40, 80, 8, 8)
+    BREAK_GEM : (40, 80, 8, 8)
 }
 
 SPECIAL_TILES_DICT = {
@@ -50,7 +50,7 @@ SPECIAL_TILES_DICT = {
     (2, 10) : [(0, 0), PHASE_GEM],
     (3, 10) : [(0, 0), DASH_GEM],
     (4, 10) : [(0, 0), GRAVITY_GEM],
-    (5, 10) : [(0, 0), BREAKING_GEM]
+    (5, 10) : [(0, 0), BREAK_GEM]
 }
 
 class Tilemap:
@@ -136,7 +136,7 @@ class Tilemap:
                     world_x = self.x + tx * 8
                     world_y = self.y + ty * 8
 
-                    if object_type in [JUMP_GEM, BUILD_GEM, PHASE_GEM, DASH_GEM, GRAVITY_GEM, BREAKING_GEM]:
+                    if object_type in [JUMP_GEM, BUILD_GEM, PHASE_GEM, DASH_GEM, GRAVITY_GEM, BREAK_GEM]:
                         new_gems.append(Gem(object_type, world_x, world_y))
 
         return new_gems
@@ -210,10 +210,10 @@ class Player:
             pyxel.play(1, 5)
             self.gems.pop(0)
             self.gravity_direction = -self.gravity_direction
-        elif gem == BREAKING_GEM:
+        elif gem == BREAK_GEM:
             pyxel.play(1, 4)
             self.gems.pop(0)
-            self.tilemap.replace_tiles(self.x, self.y, self.width, self.height, 4, BREAKING_TILES, (0, 0))
+            self.tilemap.replace_tiles(self.x, self.y, self.width, self.height, 4, BREAK_TILES, (0, 0))
             self.is_breaking = True
         
         for _ in range(10):
@@ -308,27 +308,16 @@ class Player:
         self.update_velocity_y()
 
     def draw(self, camera_x:int=0, camera_y:int=0):
-        if self.facing_right:
-            self.player_idle.unflip_h()
-            self.player_walk.unflip_h()
-            self.player_death.unflip_h()
-            self.player_win.unflip_h()
-        else:
-            self.player_idle.flip_h()
-            self.player_walk.flip_h()
-            self.player_death.flip_h()
-            self.player_win.flip_h()
+        for anim in [self.player_idle, self.player_walk, self.player_death, self.player_win]:
+            if self.facing_right:
+                anim.unflip_h()
+            else:
+                anim.flip_h()
 
-        if self.gravity_direction == 1:
-            self.player_idle.unflip_v()
-            self.player_walk.unflip_v()
-            self.player_death.unflip_v()
-            self.player_win.unflip_v()
-        else:
-            self.player_idle.flip_v()
-            self.player_walk.flip_v()
-            self.player_death.flip_v()
-            self.player_win.flip_v()
+            if self.gravity_direction == 1:
+                anim.unflip_v()
+            else:
+                anim.flip_v()
 
         self.particle_manager.draw()
 
