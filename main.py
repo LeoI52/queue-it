@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 06/08/2025
+@updated : 07/08/2025
 
 * Gems Types :
 - Green : Jump Gem
@@ -13,7 +13,7 @@
 
 * Pyxres Files :
 1.pyxres : Main menu, Credits, Level Selection, Level 1, Level 2, Level 3, Level 4, level 5
-2.pyxres : Level 6, Level 7
+2.pyxres : Level 6, Level 7, Level 8, Level 9
 
 * Pyxres Images :
 0. Cursor / Player / Ennemy
@@ -1118,7 +1118,7 @@ class Player:
                 pyxel.tilemaps[self.tilemap.id].pset(self.x // 8 - 1, self.y // 8 + 2 * self.gravity_direction, (random.randint(4, 5), 1))
             if pyxel.tilemaps[self.tilemap.id].pget(self.x // 8 + 1, self.y // 8 + 2 * self.gravity_direction) == (0, 0):
                 pyxel.tilemaps[self.tilemap.id].pset(self.x // 8 + 1, self.y // 8 + 2 * self.gravity_direction, (random.randint(4, 5), 1))
-        elif gem == PHASE_GEM:
+        elif gem == PHASE_GEM and not self.tilemap.collision_rect_tiles(self.x, self.y - 32 * self.gravity_direction, self.width, self.height, COLLISION_TILES):
             pyxel.play(1, 6)
             self.gems.pop(0)
             self.y -= 32 * self.gravity_direction
@@ -1137,6 +1137,9 @@ class Player:
             self.tilemap.replace_tiles(self.x, self.y, self.width, self.height, 4, BREAK_TILES, (0, 0))
             self.is_breaking = True
         
+        if (gem == JUMP_GEM and (not self.on_ground or self.jumping)) or (gem == PHASE_GEM and self.tilemap.collision_rect_tiles(self.x, self.y - 32 * self.gravity_direction, self.width, self.height, COLLISION_TILES)):
+            return
+
         for _ in range(10):
             c = [random.choice(GEM_COLORS_DICT[gem]) for _ in range(3)]
             size = random.randint(1, 2)
@@ -1302,8 +1305,11 @@ class Game:
         level_5_scene = Scene(7, "Queue It ! - Level 5", lambda:self.update_level(5), lambda:self.draw_level(5), "assets/1.pyxres", PALETTE)
         level_6_scene = Scene(8, "Queue It ! - Level 6", lambda:self.update_level(6), lambda:self.draw_level(6), "assets/2.pyxres", PALETTE)
         level_7_scene = Scene(9, "Queue It ! - Level 7", lambda:self.update_level(7), lambda:self.draw_level(7), "assets/2.pyxres", PALETTE)
+        level_8_scene = Scene(10, "Queue It ! - Level 8", lambda:self.update_level(8), lambda:self.draw_level(8), "assets/2.pyxres", PALETTE)
+        level_9_scene = Scene(11, "Queue It ! - Level 9", lambda:self.update_level(9), lambda:self.draw_level(9), "assets/2.pyxres", PALETTE)
 
-        scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene, level_6_scene, level_7_scene]
+        scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene, 
+                  level_6_scene, level_7_scene, level_8_scene, level_9_scene]
 
         #? Pyxel Manager
         self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
@@ -1327,8 +1333,8 @@ class Game:
         self.level_selection_button_5 = Button("5 ", 134, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(5))
         self.level_selection_button_6 = Button("6 ", 154, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(6))
         self.level_selection_button_7 = Button("7 ", 174, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(7))
-        self.level_selection_button_8 = Button("8 ", 54, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_9 = Button("9 ", 74, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_8 = Button("8 ", 54, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(8))
+        self.level_selection_button_9 = Button("9 ", 74, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(9))
         self.level_selection_button_10 = Button("10", 94, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_11 = Button("11", 114, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_12 = Button("12", 134, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
@@ -1425,6 +1431,12 @@ class Game:
             elif level == 7:
                 self.tilemap = Tilemap(1, 0, 0, 48*8, 48*8, 0)
                 self.player = Player(23*8, 31*8, self.tilemap, [Gem(PHASE_GEM) for _ in range(4)])
+            elif level == 8:
+                self.tilemap = Tilemap(2, 0, 0, 56*8, 56*8, 0)
+                self.player = Player(21*8, 23*8, self.tilemap, [Gem(GRAVITY_GEM) for _ in range(4)])
+            elif level == 9:
+                self.tilemap = Tilemap(3, 0, 0, 1000, 1000, 0)
+                self.player = Player(23*8, 22*8, self.tilemap)
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
             self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
