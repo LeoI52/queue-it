@@ -640,8 +640,8 @@ class Button:
         self.__width, self.__height = text_size(text, font_size)
         self.__width += 4 if border else 2
         self.__height += 4 if border else 2
-        self.__background_color = background_color
-        self.__hover_background_color = hover_background_color
+        self.background_color = background_color
+        self.hover_background_color = hover_background_color
         self.__border = border
         self.__border_color = border_color
         self.__relative = relative
@@ -675,10 +675,10 @@ class Button:
         x = camera_x + self.__x if self.__relative else self.__x
         y = camera_y + self.__y if self.__relative else self.__y
         if self.is_hovered(camera_x, camera_y):
-            pyxel.rect(x, y, self.__width, self.__height, self.__hover_background_color)
+            pyxel.rect(x, y, self.__width, self.__height, self.hover_background_color)
             self.__hover_text.draw(camera_x, camera_y)
         else:
-            pyxel.rect(x, y, self.__width, self.__height, self.__background_color)
+            pyxel.rect(x, y, self.__width, self.__height, self.background_color)
             self.__text.draw(camera_x, camera_y)
         if self.__border:
             pyxel.rectb(x, y, self.__width, self.__height, self.__border_color)
@@ -1314,6 +1314,9 @@ class Game:
         #? Pyxel Manager
         self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
 
+        #? Game Variables
+        self.max_level = 20
+
         #? Main Menu Variables
         self.main_menu_title = Text("Queue It !", 114, 10, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
         self.main_menu_play_button = Button("Play", 114, 60, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.menu_buttons_action(2))
@@ -1383,6 +1386,7 @@ class Game:
         self.dialog_manager = DialogManager(5, -50, 5, 5, 118, 50, 3, pyxel.KEY_E)
 
         self.setup_music()
+        self.color_level_selection_buttons()
 
         #? Run
         self.pyxel_manager.run()
@@ -1400,11 +1404,24 @@ class Game:
         pyxel.musics[0].set([], [], [11], [12])
         pyxel.playm(0, loop=True)
 
+    def color_level_selection_buttons(self):
+        for level_num in range(1, self.max_level + 2):
+            exec(f"self.level_selection_button_{level_num}.background_color = 6")
+            exec(f"self.level_selection_button_{level_num}.hover_background_color = 7")
+
+        for level_num in range(self.max_level + 2, 22):
+            exec(f"self.level_selection_button_{level_num}.background_color = 13")
+            exec(f"self.level_selection_button_{level_num}.hover_background_color = 12")
+
     def menu_buttons_action(self, scene_id:int):
         pyxel.play(0, 0)
         self.pyxel_manager.change_scene_dither(scene_id, 0.05, 2, action=lambda:time.sleep(0.1))
 
     def level_buttons_action(self, level:int):
+        if level > self.max_level + 1:
+            pyxel.play(1, 9)
+            return
+
         pyxel.play(0, 0)
         self.dialog_manager = DialogManager(5, -50, 5, 5, 218, 50, 3, pyxel.KEY_E)
 
@@ -1435,7 +1452,7 @@ class Game:
                 self.tilemap = Tilemap(2, 0, 0, 56*8, 56*8, 0)
                 self.player = Player(21*8, 23*8, self.tilemap, [Gem(GRAVITY_GEM) for _ in range(4)])
             elif level == 9:
-                self.tilemap = Tilemap(3, 0, 0, 1000, 1000, 0)
+                self.tilemap = Tilemap(3, 0, 0, 64*8, 48*8, 0)
                 self.player = Player(23*8, 22*8, self.tilemap)
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
@@ -1516,6 +1533,7 @@ class Game:
     def update_level(self, level:int):
         if pyxel.btnp(pyxel.KEY_ESCAPE):
             pyxel.play(0, 0)
+            self.color_level_selection_buttons()
             self.pyxel_manager.change_scene_dither(2, 0.05, 2, action=lambda:time.sleep(0.1))
             return
 
@@ -1528,6 +1546,7 @@ class Game:
         
         if self.player.player_win.is_finished():
             pyxel.play(0, 0)
+            self.max_level = max(self.max_level, level)
             self.level_buttons_action(level + 1)
             return
 
