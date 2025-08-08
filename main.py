@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 07/08/2025
+@updated : 08/08/2025
 
 * Gems Types :
 - Green : Jump Gem
@@ -14,7 +14,7 @@
 * Pyxres Files :
 1.pyxres : Main menu, Credits, Level Selection, Level 1, Level 2, Level 3, Level 4, level 5
 2.pyxres : Level 6, Level 7, Level 8, Level 9, Level 10, Level 11, Level 12, Level 13
-3.pyxres : Level 14
+3.pyxres : Level 14, Level 15
 
 * Pyxres Images :
 0. Cursor / Player / Ennemy / Sound Icons
@@ -1369,10 +1369,11 @@ class Game:
         level_12_scene = Scene(14, "Queue It ! - Level 12", lambda:self.update_level(12), lambda:self.draw_level(12), "assets/2.pyxres", PALETTE)
         level_13_scene = Scene(15, "Queue It ! - Level 13", lambda:self.update_level(13), lambda:self.draw_level(13), "assets/2.pyxres", PALETTE)
         level_14_scene = Scene(16, "Queue It ! - Level 14", lambda:self.update_level(14), lambda:self.draw_level(14), "assets/3.pyxres", PALETTE)
+        level_15_scene = Scene(17, "Queue It ! - Level 15", lambda:self.update_level(15), lambda:self.draw_level(15), "assets/3.pyxres", PALETTE)
 
         scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene, 
                   level_6_scene, level_7_scene, level_8_scene, level_9_scene, level_10_scene, level_11_scene, level_12_scene, level_13_scene,
-                  level_14_scene]
+                  level_14_scene, level_15_scene]
 
         #? Pyxel Manager
         self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
@@ -1408,7 +1409,7 @@ class Game:
         self.level_selection_button_12 = Button("12", 134, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(12))
         self.level_selection_button_13 = Button("13", 154, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(13))
         self.level_selection_button_14 = Button("14", 174, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(14))
-        self.level_selection_button_15 = Button("15", 54, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_15 = Button("15", 54, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(15))
         self.level_selection_button_16 = Button("16", 74, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_17 = Button("17", 94, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_18 = Button("18", 114, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
@@ -1536,8 +1537,11 @@ class Game:
                 self.tilemap = Tilemap(7, 0, 0, 64*8, 40*8, 0)
                 self.player = Player(21*8, 26*8, self.tilemap)
             elif level == 14:
-                self.tilemap = Tilemap(0, 0, 0, 1000, 1000, 0)
+                self.tilemap = Tilemap(0, 0, 0, 64*8, 32*8, 0)
                 self.player = Player(32*8, 23*8, self.tilemap, [Gem(JUMP_GEM) for _ in range(4)])
+            elif level == 15:
+                self.tilemap = Tilemap(1, 0, 0, 56*8, 72*8, 0)
+                self.player = Player(17*8, 58*8, self.tilemap, [Gem(PHASE_GEM), Gem(BUILD_GEM)] * 10)
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
             self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
