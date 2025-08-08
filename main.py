@@ -13,10 +13,11 @@
 
 * Pyxres Files :
 1.pyxres : Main menu, Credits, Level Selection, Level 1, Level 2, Level 3, Level 4, level 5
-2.pyxres : Level 6, Level 7, Level 8, Level 9, Level 10, Level 11, Level 12
+2.pyxres : Level 6, Level 7, Level 8, Level 9, Level 10, Level 11, Level 12, Level 13
+3.pyxres : Level 14
 
 * Pyxres Images :
-0. Cursor / Player / Ennemy
+0. Cursor / Player / Ennemy / Sound Icons
 1. Tiles /
 2.
 
@@ -683,6 +684,52 @@ class Button:
         if self.__border:
             pyxel.rectb(x, y, self.__width, self.__height, self.__border_color)
 
+class IconButton:
+
+    def __init__(self, x:int, y:int, background_color:int, hover_background_color:int, sprite:Sprite, border:bool=False, border_color:int=0, relative:bool=True, anchor:int=ANCHOR_TOP_LEFT, command=None):
+        self.__x = x + 1 if not border else x + 2
+        self.__y = y + 1 if not border else y + 2
+        self.__width = sprite.width + 2 if not border else sprite.width + 4
+        self.__height = sprite.height + 2 if not border else sprite.height + 4
+        self.__background_color = background_color
+        self.__hover_background_color = hover_background_color
+        self.__sprite = sprite
+        self.__border = border
+        self.__border_color = border_color
+        self.__relative = relative
+        self.__command = command
+
+        if anchor in [ANCHOR_TOP_RIGHT, ANCHOR_BOTTOM_RIGHT, ANCHOR_RIGHT]:
+            self.__x -= self.__width
+        if anchor in [ANCHOR_BOTTOM_LEFT, ANCHOR_BOTTOM_RIGHT, ANCHOR_BOTTOM]:
+            self.__y -= self.__height
+        if anchor in [ANCHOR_TOP, ANCHOR_BOTTOM, ANCHOR_CENTER]:
+            self.__x -= self.__width // 2
+        if anchor in [ANCHOR_LEFT, ANCHOR_RIGHT, ANCHOR_CENTER]:
+            self.__y -= self.__height // 2
+
+    def is_hovered(self, camera_x:int=0, camera_y:int=0)-> bool:
+        if self.__x - 2 < pyxel.mouse_x < self.__x + self.__sprite.width + 1 and self.__y - 2 < pyxel.mouse_y < self.__y + self.__sprite.height + 1 and self.__relative:
+            return True
+        elif self.__x - 2 < camera_x + pyxel.mouse_x < self.__x + self.__sprite.width + 1 and self.__y - 2 < camera_y + pyxel.mouse_y < self.__y + self.__sprite.height + 1 and not self.__relative:
+            return True
+        
+    def update(self, camera_x:int=0, camera_y:int=0):
+        if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) and self.is_hovered(camera_x, camera_y) and self.__command:
+            self.__command()
+
+    def draw(self, camera_x:int=0, camera_y:int=0):
+        x = camera_x + self.__x if self.__relative else self.__x
+        y = camera_y + self.__y if self.__relative else self.__y
+
+        if self.__border:
+            pyxel.rectb(x - 2, y - 2, self.__sprite.width + 4, self.__sprite.height + 4, self.__border_color)
+        if self.is_hovered(camera_x, camera_y):
+            pyxel.rect(x - 1, y - 1, self.__sprite.width + 2, self.__sprite.height + 2, self.__hover_background_color)
+        else:
+            pyxel.rect(x - 1, y - 1, self.__sprite.width + 2, self.__sprite.height + 2, self.__background_color)
+        pyxel.blt(x, y, self.__sprite.img, self.__sprite.u, self.__sprite.v, self.__sprite.width, self.__sprite.height, self.__sprite.colkey)
+
 class Dialog:
 
     def __init__(self, lines:list, background_color:int, names_colors:list|int, text_colors:list|int, border:bool=False, border_color:int=0, sound:bool=False, channel:int=0, sound_number:int=0)-> None:
@@ -1320,9 +1367,12 @@ class Game:
         level_10_scene = Scene(12, "Queue It ! - Level 10", lambda:self.update_level(10), lambda:self.draw_level(10), "assets/2.pyxres", PALETTE)
         level_11_scene = Scene(13, "Queue It ! - Level 11", lambda:self.update_level(11), lambda:self.draw_level(11), "assets/2.pyxres", PALETTE)
         level_12_scene = Scene(14, "Queue It ! - Level 12", lambda:self.update_level(12), lambda:self.draw_level(12), "assets/2.pyxres", PALETTE)
+        level_13_scene = Scene(15, "Queue It ! - Level 13", lambda:self.update_level(13), lambda:self.draw_level(13), "assets/2.pyxres", PALETTE)
+        level_14_scene = Scene(16, "Queue It ! - Level 14", lambda:self.update_level(14), lambda:self.draw_level(14), "assets/3.pyxres", PALETTE)
 
         scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene, 
-                  level_6_scene, level_7_scene, level_8_scene, level_9_scene, level_10_scene, level_11_scene, level_12_scene]
+                  level_6_scene, level_7_scene, level_8_scene, level_9_scene, level_10_scene, level_11_scene, level_12_scene, level_13_scene,
+                  level_14_scene]
 
         #? Pyxel Manager
         self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
@@ -1335,6 +1385,8 @@ class Game:
         self.main_menu_play_button = Button("Play", 114, 60, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.menu_buttons_action(2))
         self.main_menu_credits_button = Button("Credits", 114, 80, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.menu_buttons_action(1))
         self.main_menu_quit_button = Button("Quit", 114, 100, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:pyxel.quit())
+        self.main_menu_sound_button = IconButton(2, 104, 6, 7, Sprite(0, 0, 48, 16, 16, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.setup_music)
+        self.main_menu_mute_button = IconButton(2, 126, 6, 7, Sprite(0, 16, 48, 16, 16, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.mute_music)
 
         #? Credits Variables
         self.credits_text = Text("This game was made by\nLéo Imbert & Eddy Mongin.\n\n\n\n\n\n\n\nIt was originally created for\n'La Nuit Du Code', but\nwe continued working on it\nand made this finished version.", 114, 10, 8, 1, ANCHOR_TOP, shadow=True, shadow_color=2)
@@ -1354,8 +1406,8 @@ class Game:
         self.level_selection_button_10 = Button("10", 94, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(10))
         self.level_selection_button_11 = Button("11", 114, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(11))
         self.level_selection_button_12 = Button("12", 134, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(12))
-        self.level_selection_button_13 = Button("13", 154, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_14 = Button("14", 174, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_13 = Button("13", 154, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(13))
+        self.level_selection_button_14 = Button("14", 174, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(14))
         self.level_selection_button_15 = Button("15", 54, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_16 = Button("16", 74, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
         self.level_selection_button_17 = Button("17", 94, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
@@ -1417,6 +1469,10 @@ class Game:
         pyxel.musics[0].set([], [], [11], [12])
         pyxel.playm(0, loop=True)
 
+    def mute_music(self):
+        pyxel.stop(2)
+        pyxel.stop(3)
+
     def color_level_selection_buttons(self):
         for level_num in range(1, self.max_level + 2):
             exec(f"self.level_selection_button_{level_num}.background_color = 6")
@@ -1474,8 +1530,14 @@ class Game:
                 self.tilemap = Tilemap(5, 0, 0, 56*8, 40*8, 0)
                 self.player = Player(22*8, 30*8, self.tilemap)
             elif level == 12:
-                self.tilemap = Tilemap(6, 0, 0, 1000, 1000, 0)
+                self.tilemap = Tilemap(6, 0, 0, 56*8, 40*8, 0)
                 self.player = Player(27*8, 30*8, self.tilemap, [Gem(PHASE_GEM) for _ in range(2)])
+            elif level == 13:
+                self.tilemap = Tilemap(7, 0, 0, 64*8, 40*8, 0)
+                self.player = Player(21*8, 26*8, self.tilemap)
+            elif level == 14:
+                self.tilemap = Tilemap(0, 0, 0, 1000, 1000, 0)
+                self.player = Player(32*8, 23*8, self.tilemap, [Gem(JUMP_GEM) for _ in range(4)])
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
             self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
@@ -1489,6 +1551,8 @@ class Game:
         self.main_menu_play_button.update()
         self.main_menu_credits_button.update()
         self.main_menu_quit_button.update()
+        self.main_menu_sound_button.update()
+        self.main_menu_mute_button.update()
 
     def draw_main_menu(self):
         pyxel.cls(16)
@@ -1502,6 +1566,8 @@ class Game:
         self.main_menu_play_button.draw()
         self.main_menu_credits_button.draw()
         self.main_menu_quit_button.draw()
+        self.main_menu_sound_button.draw()
+        self.main_menu_mute_button.draw()
 
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
 
