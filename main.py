@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 08/08/2025
+@updated : 10/08/2025
 
 * Gems Types :
 - Green : Jump Gem
@@ -14,7 +14,7 @@
 * Pyxres Files :
 1.pyxres : Main menu, Credits, Level Selection, Level 1, Level 2, Level 3, Level 4, level 5
 2.pyxres : Level 6, Level 7, Level 8, Level 9, Level 10, Level 11, Level 12, Level 13
-3.pyxres : Level 14, Level 15
+3.pyxres : Level 14, Level 15, Level 16
 
 * Pyxres Images :
 0. Cursor / Player / Ennemy / Sound Icons
@@ -1370,16 +1370,19 @@ class Game:
         level_13_scene = Scene(15, "Queue It ! - Level 13", lambda:self.update_level(13), lambda:self.draw_level(13), "assets/2.pyxres", PALETTE)
         level_14_scene = Scene(16, "Queue It ! - Level 14", lambda:self.update_level(14), lambda:self.draw_level(14), "assets/3.pyxres", PALETTE)
         level_15_scene = Scene(17, "Queue It ! - Level 15", lambda:self.update_level(15), lambda:self.draw_level(15), "assets/3.pyxres", PALETTE)
+        level_16_scene = Scene(18, "Queue It ! - Level 16", lambda:self.update_level(16), lambda:self.draw_level(16), "assets/3.pyxres", PALETTE)
 
         scenes = [main_menu_scene, credits_scene, level_selection_scene, level_1_scene, level_2_scene, level_3_scene, level_4_scene, level_5_scene, 
                   level_6_scene, level_7_scene, level_8_scene, level_9_scene, level_10_scene, level_11_scene, level_12_scene, level_13_scene,
-                  level_14_scene, level_15_scene]
+                  level_14_scene, level_15_scene, level_16_scene]
 
         #? Pyxel Manager
-        self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_A)
+        self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_NONE)
 
         #? Game Variables
-        self.max_level = 20
+        self.max_level = 0
+        self.win_title = Text("You Win !\nThank's for playing !", 114, 44, [6,6,7,7,8,8], 1, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, True, shadow=True, shadow_color=2)
+        self.particle_manager = ParticleManager()
 
         #? Main Menu Variables
         self.main_menu_title = Text("Queue It !", 114, 10, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
@@ -1395,27 +1398,22 @@ class Game:
 
         #? Level Selection Variables
         self.level_selection_title = Text("Level Selection", 114, 5, [6,6,7,7,8,8], 2, ANCHOR_TOP, ROTATING_COLOR_MODE, 20, shadow=True, shadow_color=2, shadow_offset=2)
-        self.level_selection_button_1 = Button("1 ", 54, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(1))
-        self.level_selection_button_2 = Button("2 ", 74, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(2))
-        self.level_selection_button_3 = Button("3 ", 94, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(3))
-        self.level_selection_button_4 = Button("4 ", 114, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(4))
-        self.level_selection_button_5 = Button("5 ", 134, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(5))
-        self.level_selection_button_6 = Button("6 ", 154, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(6))
-        self.level_selection_button_7 = Button("7 ", 174, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(7))
-        self.level_selection_button_8 = Button("8 ", 54, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(8))
-        self.level_selection_button_9 = Button("9 ", 74, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(9))
-        self.level_selection_button_10 = Button("10", 94, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(10))
-        self.level_selection_button_11 = Button("11", 114, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(11))
-        self.level_selection_button_12 = Button("12", 134, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(12))
-        self.level_selection_button_13 = Button("13", 154, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(13))
-        self.level_selection_button_14 = Button("14", 174, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(14))
-        self.level_selection_button_15 = Button("15", 54, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.level_buttons_action(15))
-        self.level_selection_button_16 = Button("16", 74, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_17 = Button("17", 94, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_18 = Button("18", 114, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_19 = Button("19", 134, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_20 = Button("20", 154, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
-        self.level_selection_button_21 = Button("21", 174, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP)
+        self.level_selection_button_1 = Button("1 ", 69, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(1))
+        self.level_selection_button_2 = Button("2 ", 90, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(2))
+        self.level_selection_button_3 = Button("3 ", 111, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(3))
+        self.level_selection_button_4 = Button("4 ", 117, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(4))
+        self.level_selection_button_5 = Button("5 ", 139, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(5))
+        self.level_selection_button_6 = Button("6 ", 160, 46, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(6))
+        self.level_selection_button_7 = Button("7 ", 69, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(7))
+        self.level_selection_button_8 = Button("8 ", 90, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(8))
+        self.level_selection_button_9 = Button("9 ", 111, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(9))
+        self.level_selection_button_10 = Button("10", 117, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(10))
+        self.level_selection_button_11 = Button("11", 139, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(11))
+        self.level_selection_button_12 = Button("12", 160, 66, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(12))
+        self.level_selection_button_13 = Button("13", 90, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(13))
+        self.level_selection_button_14 = Button("14", 111, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_RIGHT, command=lambda:self.level_buttons_action(14))
+        self.level_selection_button_15 = Button("15", 117, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(15))
+        self.level_selection_button_16 = Button("16", 139, 86, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP_LEFT, command=lambda:self.level_buttons_action(16))
         self.level_selection_back_button = Button("Back", 2, 126, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=lambda:self.menu_buttons_action(0))
 
         #? Main Menus
@@ -1425,7 +1423,7 @@ class Game:
         self.dialog_1 = Dialog([("Sign", "Welcome to Queue It !\nUse the right gem to overcome\neach challenge."),
                                 ("Sign", "Each gem gives you a different\nability. Press SPACE to use the\nfirst gem in your queue."),
                                 ("Sign", "If you get stuck, press R to\nrestart the level at any time."),
-                                ("Sign", "You can also press ESC to\nreturn to the main menu."),
+                                ("Sign", "You can also press ESC to\nreturn to the level selection."),
                                 ("Sign", "See that green gem up ahead ?\nIt gives you the power to JUMP."),
                                 ("Sign", "Go on, give it a try !")], 0, 9, 9, True, 9, True, 0, 10)
         self.dialog_2 = Dialog([("Sign", "This gem grants a quick DASH\nforward."),
@@ -1479,7 +1477,7 @@ class Game:
             exec(f"self.level_selection_button_{level_num}.background_color = 6")
             exec(f"self.level_selection_button_{level_num}.hover_background_color = 7")
 
-        for level_num in range(self.max_level + 2, 22):
+        for level_num in range(self.max_level + 2, 17):
             exec(f"self.level_selection_button_{level_num}.background_color = 13")
             exec(f"self.level_selection_button_{level_num}.hover_background_color = 12")
 
@@ -1537,14 +1535,20 @@ class Game:
                 self.tilemap = Tilemap(7, 0, 0, 64*8, 40*8, 0)
                 self.player = Player(21*8, 26*8, self.tilemap)
             elif level == 14:
-                self.tilemap = Tilemap(0, 0, 0, 64*8, 32*8, 0)
-                self.player = Player(32*8, 23*8, self.tilemap, [Gem(JUMP_GEM) for _ in range(4)])
+                self.tilemap = Tilemap(0, 0, 0, 64*8, 40*8, 0)
+                self.player = Player(32*8, 25*8, self.tilemap, [Gem(JUMP_GEM) for _ in range(4)])
             elif level == 15:
                 self.tilemap = Tilemap(1, 0, 0, 56*8, 72*8, 0)
                 self.player = Player(17*8, 58*8, self.tilemap, [Gem(PHASE_GEM), Gem(BUILD_GEM)] * 10)
+            elif level == 16:
+                self.tilemap = Tilemap(2, 0, 0, 48*8, 16*8, 0)
+                self.player = Player(23*8, 6*8, self.tilemap)
 
             self.gem_manager = GemManager(self.tilemap.load_tiles())
-            self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
+            if level == 16:
+                self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - (64+32))
+            else:
+                self.pyxel_manager.set_camera(self.player.x - 114, self.player.y - 64)
             time.sleep(0.1)
 
         self.pyxel_manager.change_scene_outer_circle(level + 2, 4, 2, action=action)
@@ -1600,7 +1604,7 @@ class Game:
         self.player_animation_menus.update()
         self.level_selection_title.update()
         self.level_selection_back_button.update()
-        for i in range(1, 22):
+        for i in range(1, 17):
             eval(f"self.level_selection_button_{i}.update()")
 
     def draw_level_selection(self):
@@ -1616,7 +1620,7 @@ class Game:
 
         self.level_selection_title.draw()
         self.level_selection_back_button.draw()
-        for i in range(1, 22):
+        for i in range(1, 17):
             eval(f"self.level_selection_button_{i}.draw()")
 
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
@@ -1646,7 +1650,10 @@ class Game:
         if self.player.is_breaking:
             self.pyxel_manager.shake_camera(10, 0.5)
         self.gem_manager.update(self.player)
-        self.pyxel_manager.move_camera(self.player.x - 114, self.player.y - 64)
+        if level == 16:
+            self.pyxel_manager.move_camera(self.player.x - 114, self.player.y - (64+32))
+        else:
+            self.pyxel_manager.move_camera(self.player.x - 114, self.player.y - 64)
 
         if level == 1:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 21, 30) and not self.dialog_manager.is_dialog():
@@ -1666,6 +1673,18 @@ class Game:
         elif level == 4:
             if pyxel.btnp(pyxel.KEY_E) and self.player.tilemap.collision_tile_coord(self.player.x, self.player.y, self.player.width, self.player.height, 26, 15) and not self.dialog_manager.is_dialog():
                 self.dialog_manager.start_dialog(self.dialog_7)
+        elif level == 16:
+            self.win_title.update()
+            self.particle_manager.update()
+            if pyxel.frame_count % 30 == 0:
+                x, y = random.randint(10*8, 33*8), random.randint(0*8, 7*8)
+                pyxel.play(random.randint(0, 1), 1)
+                for _ in range(20):
+                    s = random.randint(1, 3)
+                    c = [random.randint(0, 15) for _ in range(4)]
+                    off_x, off_y = random.uniform(-2, 2), random.uniform(-2, 2)
+                    g = random.uniform(-0.05, 0.05)
+                    self.particle_manager.add_particle(OvalParticle(x, y, s, s, c, 100, 0.5, x + off_x, y + off_y, g, -0.005, 10, random.randint(0, 1)))
 
         self.dialog_manager.update()
 
@@ -1679,7 +1698,11 @@ class Game:
         self.player.draw(self.pyxel_manager.camera_x, self.pyxel_manager.camera_y)
         self.dialog_manager.draw(self.pyxel_manager.camera_x, self.pyxel_manager.camera_y)
 
-        pyxel.text(self.pyxel_manager.camera_x + 226 - len(f"Level {level}") * 4, self.pyxel_manager.camera_y + 2, f"Level {level}", 1)
+        if level == 16:
+            self.win_title.draw(self.pyxel_manager.camera_x, self.pyxel_manager.camera_y)
+            self.particle_manager.draw()
+        else:
+            pyxel.text(self.pyxel_manager.camera_x + 226 - len(f"Level {level}") * 4, self.pyxel_manager.camera_y + 2, f"Level {level}", 1)
 
 #? Main
 if __name__ == "__main__":
