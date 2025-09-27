@@ -1,7 +1,7 @@
 """
 @author : Léo IMBERT & Eddy MONGIN
 @created : 14/05/2025
-@updated : 10/08/2025
+@updated : 27/09/2025
 
 * Gems Types :
 - Green : Jump Gem
@@ -1377,7 +1377,7 @@ class Game:
                   level_14_scene, level_15_scene, level_16_scene]
 
         #? Pyxel Manager
-        self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, True, False, pyxel.KEY_NONE)
+        self.pyxel_manager = PyxelManager(228, 128, scenes, 0, FPS, False, False, pyxel.KEY_NONE)
 
         #? Game Variables
         self.max_level = 0
@@ -1389,8 +1389,8 @@ class Game:
         self.main_menu_play_button = Button("Play", 114, 60, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.menu_buttons_action(2))
         self.main_menu_credits_button = Button("Credits", 114, 80, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:self.menu_buttons_action(1))
         self.main_menu_quit_button = Button("Quit", 114, 100, 6, 8, 7, 8, 1, True, 8, anchor=ANCHOR_TOP, command=lambda:pyxel.quit())
-        self.main_menu_sound_button = IconButton(2, 104, 6, 7, Sprite(0, 0, 48, 16, 16, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.setup_music)
-        self.main_menu_mute_button = IconButton(2, 126, 6, 7, Sprite(0, 16, 48, 16, 16, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.mute_music)
+        self.main_menu_sound_button = IconButton(2, 112, 6, 7, Sprite(0, 0, 48, 8, 8, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.setup_music)
+        self.main_menu_mute_button = IconButton(2, 126, 6, 7, Sprite(0, 8, 48, 8, 8, 15), True, 8, anchor=ANCHOR_BOTTOM_LEFT, command=self.mute_music)
 
         #? Credits Variables
         self.credits_text = Text("This game was made by\nLéo Imbert & Eddy Mongin.\n\n\n\n\n\n\n\nIt was originally created for\n'La Nuit Du Code', but\nwe continued working on it\nand made this finished version.", 114, 10, 8, 1, ANCHOR_TOP, shadow=True, shadow_color=2)
