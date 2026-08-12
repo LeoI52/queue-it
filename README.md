@@ -4,7 +4,7 @@ A fast-paced puzzle-platformer about using the right gem at the right time.
 
 ## 📸 Preview
 
-![screenshot_1](img/screenshot_1.png)
+![screenshot_1](img/screenshot_3.png)
 
 ## 🎮 Gameplay
 

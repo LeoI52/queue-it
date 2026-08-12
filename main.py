@@ -107,12 +107,12 @@ DOORS_DICT = {
     (270,64):[0,(16,12),"Main Menu"],
 }
 
-DIALOG_1 = Dialog([("Sign","Welcome to Queue It!"),("Sign","You can move with Q/D or use the left\ngamepad joystick."),("Sign","If you are blocked restart the level\nwith R or the top gamepad button."),("Sign","You can interact with objects by\npressing E or the left gamepad button."),("Sign", "In this game gems go into a queue.\nPress Space or the bottom gamepad\nbutton to use the oldest one first."),("Sign","Each gem gives you a different power,\ngo ahead try the green one.")], 32, 12, 12, True, 12)
-DIALOG_2 = Dialog([("Sign","The blue gem allows you to dash."),("Sign","During that dash, you are invincible.\nGreat for going through spikes."),("Sign","But you can't change direction while\ndashing, so be careful.")], 32, 9, 9, True, 9)
-DIALOG_3 = Dialog([("Sign","The pink gem gives you the power to\nphase upward."),("Sign","The phasing is always exactly 4 tiles.\nIf you can't phase there, you can't\nuse the gem.")], 32, 28, 28, True, 28)
-DIALOG_4 = Dialog([("Sign","The red gem reverse your gravity."),("Sign","While reversed you jump and phase in\nthe opposite vertical direction.")], 32, 23, 23, True, 23)
-DIALOG_5 = Dialog([("Sign","Here you can see breakable blocks.\nThe gray gem can destroy them !"),("Sign","Be careful because the radius isn't\ninfinite.")], 32, 3, 3, True, 3)
-DIALOG_6 = Dialog([("Sign","Finally, the yellow gem helps you build\nunderneath your feet."),("Sign","Giving you a nice platform made of\nbreakable tiles.")], 32, 25, 25, True, 25)
+DIALOG_1 = Dialog([("Sign","Welcome to Queue It!"),("Sign","You can move with Q/D or use the left\ngamepad joystick."),("Sign","If you are blocked restart the level\nwith R or the top gamepad button."),("Sign","You can interact with objects by\npressing E or the left gamepad button."),("Sign", "In this game gems go into a queue.\nPress Space or the bottom gamepad\nbutton to use the oldest one first."),("Sign","Each gem gives you a different power,\ngo ahead try the green one.")], 32, 12, 12, True, 12, True, 10, 10)
+DIALOG_2 = Dialog([("Sign","The blue gem allows you to dash."),("Sign","During that dash, you are invincible.\nGreat for going through spikes."),("Sign","But you can't change direction while\ndashing, so be careful.")], 32, 9, 9, True, 9, True, 10, 10)
+DIALOG_3 = Dialog([("Sign","The pink gem gives you the power to\nphase upward."),("Sign","The phasing is always exactly 4 tiles.\nIf you can't phase there, you can't\nuse the gem.")], 32, 28, 28, True, 28, True, 10, 10)
+DIALOG_4 = Dialog([("Sign","The red gem reverse your gravity."),("Sign","While reversed you jump and phase in\nthe opposite vertical direction.")], 32, 23, 23, True, 23, True, 10, 10)
+DIALOG_5 = Dialog([("Sign","Here you can see breakable blocks.\nThe gray gem can destroy them !"),("Sign","Be careful because the radius isn't\ninfinite.")], 32, 3, 3, True, 3, True, 10, 10)
+DIALOG_6 = Dialog([("Sign","Finally, the yellow gem helps you build\nunderneath your feet."),("Sign","Giving you a nice platform made of\nbreakable tiles.")], 32, 25, 25, True, 25, True, 10, 10)
 
 DIALOGS_DICT = {
     (116,17):DIALOG_1,
@@ -181,7 +181,6 @@ class Player:
         self.on_ground = False
         self.jumping = False
         self.death = False
-        self.free = False
 
     def reset(self):
         self.gravity_dir = 1
@@ -205,6 +204,7 @@ class Player:
             can_jump = (self.on_ground or self.coyote_timer > 0) and not self.jumping
         
             if can_jump:
+                pyxel.play(1, 1)
                 self.gems.pop(0)
                 particle = True
                 self.vy = -self.jump_power * self.gravity_dir
@@ -213,12 +213,14 @@ class Player:
                 self.coyote_timer = 0
 
         elif gem == DASH_GEM:
+            pyxel.play(2, 2)
             self.gems.pop(0)
             particle = True
             self.dash_timer = self.dash_time
 
         elif gem == PHASE_GEM:
             if not collision_rect_tiles(self.x, self.y - 32 * self.gravity_dir, self.w, self.h, COLLISION_TILES):
+                pyxel.play(3, 3)
                 self.gems.pop(0)
                 particle = True
                 self.y -= 32 * self.gravity_dir
@@ -227,6 +229,7 @@ class Player:
                 particle = False
 
         elif gem == GRAVITY_GEM:
+            pyxel.play(4, 4)
             self.gems.pop(0)
             particle = True
             self.gravity_dir *= -1
@@ -235,19 +238,23 @@ class Player:
             if pyxel.tilemaps[0].pget(self.x // 8, self.y // 8 + 2 * self.gravity_dir) not in COLLISION_TILES:
                 pyxel.tilemaps[0].pset(self.x // 8, self.y // 8 + 2 * self.gravity_dir, random.choice(BREAK_TILES))
                 self.gems.pop(0)
+                pyxel.play(6, 6)
                 particle = True
             if pyxel.tilemaps[0].pget(self.x // 8 - 1, self.y // 8 + 2 * self.gravity_dir) not in COLLISION_TILES:
                 pyxel.tilemaps[0].pset(self.x // 8 - 1, self.y // 8 + 2 * self.gravity_dir, random.choice(BREAK_TILES))
                 if not particle:
                     particle = True
                     self.gems.pop(0)
+                    pyxel.play(6, 6)
             if pyxel.tilemaps[0].pget(self.x // 8 + 1, self.y // 8 + 2 * self.gravity_dir) not in COLLISION_TILES:
                 pyxel.tilemaps[0].pset(self.x // 8 + 1, self.y // 8 + 2 * self.gravity_dir, random.choice(BREAK_TILES))
                 if not particle:
                     particle = True
                     self.gems.pop(0)
+                    pyxel.play(6, 6)
 
         elif gem == BREAK_GEM:
+            pyxel.play(5, 5)
             particle = True
             self.gems.pop(0)
             tiles = replace_tiles(self.x, self.y, self.w, self.h, 16, BREAK_TILES, (0,0))
@@ -270,21 +277,10 @@ class Player:
             self.particle_manager.add_particle(OvalParticle(x, y, size, size, c, 100, random.uniform(0.08, 0.25), (x, y - self.gravity_dir), dither_duration=10))
 
     def die(self):
-        if self.free:
-            return
         self.death = True
+        pyxel.play(9, 9)
 
         self.pyxel_manager.shake_camera(3, 0.2)
-
-    def _handle_free_movement(self):
-        if left():
-            self.x -= 2
-        if right():
-            self.x += 2
-        if up():
-            self.y -= 2
-        if down():
-            self.y += 2
 
     def _handle_death(self):
         if collision_rect_tiles(self.x + 1, self.y + 2, 6, 5, KILL_TILES):
@@ -355,13 +351,6 @@ class Player:
                 break
 
     def update(self):
-        if pyxel.btnp(pyxel.KEY_F) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.free = not self.free
-
-        if self.free:
-            self._handle_free_movement()
-            return
-        
         if self.death:
             self.player_death.update()
             return
@@ -424,6 +413,7 @@ class GemManager:
         for gem in self.gems:
             if collision_rect_rect(player.x + 1, player.y + 1, player.w - 2, player.h - 2, gem.x, gem.y, gem.w, gem.h) and not gem.collected:
                 player.gems.append(gem)
+                pyxel.play(7, 7)
                 gem.collected = True
 
         self.gems = [gem for gem in self.gems if not gem.collected]
@@ -597,7 +587,7 @@ class Game:
         ]
 
         #? Pyxel Manager
-        self.pyxel_manager = PyxelManager((280, 176), scenes, 0, 60, True, False, "assets2.pyxres", PALETTE, camera_x=8, camera_y=8)
+        self.pyxel_manager = PyxelManager((280, 176), scenes, 0, 60, False, False, "assets.pyxres", PALETTE, camera_x=8, camera_y=8)
 
         #? Game Variables
         self.id = 0
@@ -614,16 +604,40 @@ class Game:
         #? Text
         self.title = Text("Queue It !", 140, 20, [24,24,25,25,26,26], FONT_DEFAULT, 3, TOP, (VERTICAL, ROTATING_COLOR_MODE, 20), outline_color=1, relative=True)
         self.credits = Text("Credits", 140, 20, [24,24,25,25,26,26], FONT_DEFAULT, 3, TOP, (VERTICAL, ROTATING_COLOR_MODE, 20), outline_color=1, relative=True)
-        self.credits_text = Text(wrap_text_width("This game was made by Léo Imbert.", 200, 1, FONT_DEFAULT), 140, 64, 26, FONT_DEFAULT, 1, TOP, outline_color=1, relative=True)
+        self.credits_text = Text(wrap_text_width("This game was made by Léo Imbert.\nMusic : Sunset Bridge by Purely Grey\nSFX : kronbits on itch", 200, 1, FONT_DEFAULT), 140, 80, 26, FONT_DEFAULT, 1, TOP, outline_color=1, relative=True)
         self.end = Text("The End !", 140, 20, [24,24,25,25,26,26], FONT_DEFAULT, 3, TOP, (VERTICAL, ROTATING_COLOR_MODE, 20), outline_color=1, relative=True)
 
-        #? Music
-        pyxel.sounds[0].pcm("sounds/music.wav")
-        pyxel.channels[0].gain = 0.5
+        #? Sounds
+        self.load_sounds()
+        self.set_volumes()
         pyxel.play(0, 0, loop=True)
 
         #? Run
         self.pyxel_manager.run()
+
+    def load_sounds(self):
+        pyxel.channels.clear()
+        pyxel.channels.extend([pyxel.Channel() for _ in range(11)])
+        pyxel.sounds[0].pcm("sounds/music.wav")
+        pyxel.sounds[1].pcm("sounds/jump.wav")
+        pyxel.sounds[2].pcm("sounds/dash.wav")
+        pyxel.sounds[3].pcm("sounds/phase.wav")
+        pyxel.sounds[4].pcm("sounds/gravity.wav")
+        pyxel.sounds[5].pcm("sounds/break.wav")
+        pyxel.sounds[6].pcm("sounds/build.wav")
+        pyxel.sounds[7].pcm("sounds/pickup.wav")
+        pyxel.sounds[8].pcm("sounds/door.wav")
+        pyxel.sounds[9].pcm("sounds/death.wav")
+        pyxel.sounds[10].pcm("sounds/text.wav")
+
+    def set_volumes(self):
+        pyxel.channels[0].gain = 0.2
+        pyxel.channels[2].gain = 0.7
+        pyxel.channels[5].gain = 0.5
+        pyxel.channels[6].gain = 0.5
+        pyxel.channels[7].gain = 0.3
+        pyxel.channels[8].gain = 1.25
+        pyxel.channels[9].gain = 0.4
 
     def load_level(self, id, player_pos):
         def act():
@@ -631,7 +645,7 @@ class Game:
             self.unlocked_levels.add(id)
             self.pyxel_manager.set_camera(*get_room_uv(id))
             u, v = get_room_uv(id)
-            pyxel.load("assets2.pyxres", exclude_sounds=True, exclude_musics=True)
+            pyxel.load("assets.pyxres", exclude_sounds=True, exclude_musics=True)
             self.gem_manager = GemManager(load_gems(u // 8, v // 8))
             self.particle_manager.reset()
             self.cloud_manager.reset()
@@ -657,6 +671,7 @@ class Game:
         self.gem_manager.update(self.player)
 
         if (restart() and self.id not in [0,1,2]) or self.player.player_death.is_finished():
+            pyxel.play(8, 8)
             self.load_level(self.id, (self.player.checkpoint_x, self.player.checkpoint_y))
 
         tiles = tiles_in_rect(self.player.x, self.player.y, self.player.w, self.player.h, DOOR_TILES)
@@ -667,6 +682,7 @@ class Game:
 
             if up() or interact():
                 if not self.id == 2 or id <= max(self.unlocked_levels):
+                    pyxel.play(8, 8)
                     pos = (pos[0]*8, pos[1]*8)
                     self.load_level(id, pos)
 
